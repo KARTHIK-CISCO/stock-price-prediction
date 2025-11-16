@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 # --- Config ---
-PROCESSED_DATA_PATH = "Processed_AAPL.csv"
+PROCESSED_DATA_PATH = "AAPL.csv"
 
 # --- UI ---
 st.title("📈 AAPL Stock Price Forecasting App")
