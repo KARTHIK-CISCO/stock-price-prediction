@@ -62,7 +62,7 @@ def train_numpy(Xb, y):
 weights = train_numpy(Xb, y)
 
 # --- Forecast ---
-forecast_days = st.slider("Forecast Next Days:", 1, 30, 7)
+forecast_days = st.slider("Forecast Next Days:", 1, 40, 7)
 
 last_row = X[-1:].copy()
 future_norm = []
