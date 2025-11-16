@@ -80,10 +80,17 @@ st.dataframe(forecast_df.set_index("Date"))
 # --- Plot using Streamlit ---
 st.subheader("📈 Forecast Chart")
 
+hist_dates = df["Date"].tail(60).reset_index(drop=True)
+hist_close = df["Close"].tail(60).reset_index(drop=True)
+
+future_dates_reset = forecast_df["Date"].reset_index(drop=True)
+future_pred_reset = forecast_df["Predicted Close"].reset_index(drop=True)
+
 combined_df = pd.DataFrame({
-    "Date": pd.concat([df["Date"].tail(60), forecast_df["Date"]]),
-    "Close": pd.concat([df["Close"].tail(60), pd.Series([None] * forecast_days)]),
-    "Predicted Close": pd.concat([pd.Series([None] * 60), forecast_df["Predicted Close"]])
+    "Date": pd.concat([hist_dates, future_dates_reset], ignore_index=True),
+    "Close": pd.concat([hist_close, pd.Series([None] * len(future_dates_reset))], ignore_index=True),
+    "Predicted Close": pd.concat([pd.Series([None] * len(hist_dates)), future_pred_reset], ignore_index=True)
 }).set_index("Date")
 
 st.line_chart(combined_df)
+
