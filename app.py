@@ -15,7 +15,7 @@ st.write("Forecast future REAL stock prices using Pure NumPy Regression.")
 @st.cache_data
 def load_processed(path):
     if not os.path.exists(path):
-        st.error(f"❌ '{path}' missing. Upload Processed_AAPL.csv")
+        st.error(f" '{path}' missing. Upload Processed_AAPL.csv")
         st.stop()
     df = pd.read_csv(path)
     df["Date"] = pd.to_datetime(df["Date"])
@@ -24,7 +24,7 @@ def load_processed(path):
 @st.cache_data
 def load_raw(path):
     if not os.path.exists(path):
-        st.error(f"❌ Raw file '{path}' missing. Upload AAPL.csv")
+        st.error(f" Raw file '{path}' missing. Upload AAPL.csv")
         st.stop()
     df = pd.read_csv(path)
     return df
@@ -80,7 +80,7 @@ for _ in range(forecast_days):
     last_row[0][0] = pred_norm
 
 # --- Show REAL prices ---
-st.subheader("📊 Forecasted REAL Prices (USD)")
+st.subheader(" Forecasted REAL Prices (USD)")
 
 future_dates = pd.date_range(
     df_norm["Date"].iloc[-1] + pd.Timedelta(days=1),
@@ -95,7 +95,7 @@ forecast_df = pd.DataFrame({
 st.dataframe(forecast_df.set_index("Date"))
 
 # --- Plot REAL prices ---
-st.subheader("📈 Forecast Chart (Real Price)")
+st.subheader(" Forecast Chart (Real Price)")
 
 hist_dates = df_norm["Date"].tail(60).reset_index(drop=True)
 hist_real = (df_norm["Close"].tail(60) * (real_max - real_min) + real_min).reset_index(drop=True)
