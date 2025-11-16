@@ -1,20 +1,22 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
 import os
 
-# --- Configuration ---
+# --- Config ---
 PROCESSED_DATA_PATH = "Processed_AAPL.csv"
 
-# --- Streamlit UI ---
+# --- UI ---
 st.title("📈 AAPL Stock Price Forecasting App")
-st.write("Forecast future stock prices using an automatically trained ML model.")
+st.write("Forecast future stock prices using Random Forest (Streamlit Cloud Safe Version).")
 
 # --- Load Data ---
 @st.cache_data
 def load_data(path):
     if not os.path.exists(path):
-        st.error(f"Error: Processed data file '{path}' not found.")
+        st.error(f"❌ '{path}' missing. Upload Processed_AAPL.csv")
         st.stop()
     df = pd.read_csv(path)
     df["Date"] = pd.to_datetime(df["Date"])
@@ -23,7 +25,7 @@ def load_data(path):
 
 df = load_data(PROCESSED_DATA_PATH)
 
-# --- Prepare Features ---
+# --- Feature Engineering ---
 df["target_next_close"] = df["Close"].shift(-1)
 df.dropna(inplace=True)
 
@@ -36,46 +38,43 @@ feature_cols = [
 X = df[feature_cols]
 y = df["target_next_close"]
 
-# --- Train Model Inside App ---
+# --- Train Model ---
 @st.cache_resource
-def train_model(X, y):
-    model = XGBRegressor(
+def train_rf(X, y):
+    model = RandomForestRegressor(
         n_estimators=300,
-        max_depth=6,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
+        max_depth=10,
         random_state=42,
-        n_jobs=-1,
-        verbosity=0
+        n_jobs=-1
     )
     model.fit(X, y)
     return model
 
-model = train_model(X, y)
+model = train_rf(X, y)
 
-# --- User Input ---
-forecast_days = st.slider("Select number of days to forecast:", 1, 30, 7)
+# --- Forecast ---
+forecast_days = st.slider("Forecast Next Days:", 1, 30, 7)
 
-# --- Forecasting ---
 last_row = X.iloc[-1:].copy()
 future_predictions = []
 
 for _ in range(forecast_days):
     pred = model.predict(last_row)[0]
     future_predictions.append(pred)
-    last_row.loc[last_row.index[0], "Close"] = pred  # Recursive update
+    last_row.loc[last_row.index[0], "Close"] = pred  # Recursive forecasting
 
 # --- Display Results ---
-st.subheader("📊 Forecasted Prices (Normalized)")
+st.subheader("📊 Forecasted Normalized Prices")
 
-last_date = df["Date"].iloc[-1]
-future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1),
-                              periods=forecast_days)
-
-forecast_df = pd.DataFrame(
-    {"Date": future_dates, "Predicted Close": future_predictions}
+future_dates = pd.date_range(
+    df["Date"].iloc[-1] + pd.Timedelta(days=1),
+    periods=forecast_days
 )
+
+forecast_df = pd.DataFrame({
+    "Date": future_dates,
+    "Predicted Close": future_predictions
+})
 
 st.dataframe(forecast_df.set_index("Date"))
 
@@ -88,9 +87,9 @@ ax.plot(df["Date"].tail(60), df["Close"].tail(60),
 ax.plot(future_dates, future_predictions, marker="o",
         label="Forecasted Close", color="blue")
 
-ax.set_title("AAPL Stock Price Forecast (Normalized)")
+ax.set_title("AAPL Stock Price Forecast (Normalized Close Price)")
 ax.set_xlabel("Date")
-ax.set_ylabel("Predicted Normalized Close Price")
+ax.set_ylabel("Normalized Price")
 ax.legend()
 ax.grid(True)
 
