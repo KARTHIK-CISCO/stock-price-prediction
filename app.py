@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestRegressor   # ✅ FIXED: IMPORT ADDED
+from sklearn.ensemble import RandomForestRegressor
 import os
 
 # --- Config ---
@@ -73,24 +72,20 @@ future_dates = pd.date_range(
 
 forecast_df = pd.DataFrame({
     "Date": future_dates,
-    "Predicted Close": future_predictions
+    "Predicted_Close": future_predictions
 })
 
-st.dataframe(forecast_df.set_index("Date"))
+st.dataframe(forecast_df)
 
-# --- Plot ---
-fig, ax = plt.subplots(figsize=(10, 5))
+# --- Plot using Streamlit (NO matplotlib) ---
+st.subheader("📈 Forecast Chart")
 
-ax.plot(df["Date"].tail(60), df["Close"].tail(60),
-        label="Historical Close", linestyle="--", color="gray")
+combined_df = pd.DataFrame({
+    "Date": pd.concat([df["Date"].tail(60), forecast_df["Date"]]),
+    "Close": pd.concat([df["Close"].tail(60), pd.Series([None] * forecast_days)]),
+    "Predicted_Close": pd.concat([pd.Series([None] * 60), forecast_df["Predicted_Close"]])
+})
 
-ax.plot(future_dates, future_predictions, marker="o",
-        label="Forecasted Close", color="blue")
+combined_df = combined_df.set_index("Date")
 
-ax.set_title("AAPL Stock Price Forecast (Normalized Close Price)")
-ax.set_xlabel("Date")
-ax.set_ylabel("Normalized Price")
-ax.legend()
-ax.grid(True)
-
-st.pyplot(fig)
+st.line_chart(combined_df)
