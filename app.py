@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor   # ✅ FIXED: IMPORT ADDED
 import os
 
 # --- Config ---
@@ -59,7 +61,7 @@ future_predictions = []
 for _ in range(forecast_days):
     pred = model.predict(last_row)[0]
     future_predictions.append(pred)
-    last_row.loc[last_row.index[0], "Close"] = pred  # Recursive forecasting
+    last_row.loc[last_row.index[0], "Close"] = pred
 
 # --- Display Results ---
 st.subheader("📊 Forecasted Normalized Prices")
